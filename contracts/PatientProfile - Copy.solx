@@ -1,0 +1,30 @@
+pragma solidity ^0.4.17;
+pragma experimental ABIEncoderV2;
+
+contract PatientProfileRelationManager {
+
+    struct DocumentAccessKeys {
+        uint DocumentId;
+        string Key;
+    }
+
+    struct PatientDocuments {
+        uint PatientId;
+        DocumentAccessKeys[] DocumentPermissions;
+        uint[] DoctorIds;
+    }
+
+    PatientDocuments[] public patientProfiles;
+
+    function getPatientDetails(uint patientId) returns (PatientDocuments) {
+        DocumentAccessKeys[] daks;
+        DocumentAccessKeys dak = DocumentAccessKeys(1,'abcd');
+        daks.push(dak);
+        uint[] doctorIds;
+        doctorIds.push(1);
+
+        PatientDocuments profileData = PatientDocuments(1,daks,doctorIds);
+
+        return profileData;
+    }
+}
