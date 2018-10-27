@@ -1,5 +1,5 @@
-var PatientProfile = artifacts.require("./PatientProfile.sol");
+var PatientProfileContract = artifacts.require("./PatientProfileContract.sol");
 
 module.exports = function(deployer) {
-  deployer.deploy(PatientProfile);
+  deployer.deploy(PatientProfileContract);
 };
