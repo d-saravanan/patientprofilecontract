@@ -85,7 +85,7 @@ contract PatientProfileContract {
     function setDocumentAccess(uint patientId, uint doctorId, uint documentId) public returns (string) {
         //Step0: if the patient data is not yet configured, do not proceed
         if(IsPatientConfigured[patientId] == false){
-            return emtpyString;
+            return "Patient not yet configured";
         }   
         //Step1: get the patient profile
         patient profile = patients[patientId];        
@@ -100,7 +100,7 @@ contract PatientProfileContract {
         }
 
         if(documentFound == maxDocumentLimit){
-            return emtpyString; // invalid document id
+            return "document id is invalid"; // invalid document id
         }
 
         var doctorName = Doctors[doctorId];
@@ -108,7 +108,7 @@ contract PatientProfileContract {
         bytes memory emptyStringTest_doctorName = bytes(doctorName);
 
         if(emptyStringTest_doctorName.length < 1){
-            return emtpyString; // invalid doctorId
+            return "invalid doctorId"; // invalid doctorId
         }
 
         DocumentAccess docRights;
