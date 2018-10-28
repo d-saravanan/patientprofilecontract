@@ -2,9 +2,6 @@ pragma solidity ^0.4.24;
 pragma experimental ABIEncoderV2;
 
 contract PatientProfileContract {
-    function sum(uint input1, uint input2) public returns (uint) {
-        return input1 + input2;
-    }
 
     struct patient {
         uint id;
@@ -32,11 +29,13 @@ contract PatientProfileContract {
 
     mapping(uint => patient) public patients;
     mapping(uint => bool) public IsPatientConfigured;
+    mapping(uint => string) public Doctors;
 
     function setPatientData(uint id,string fullName,string key) public returns(bool) {
 
         bytes memory emptyStringTest_FullName = bytes(fullName);
         bytes memory emptyStringTest_Key = bytes(key);
+
         if(id == 0 || emptyStringTest_FullName.length == 0 || emptyStringTest_Key.length == 0) {
             IsPatientConfigured[id] = false;
             return false;
@@ -60,7 +59,7 @@ contract PatientProfileContract {
         return (data.id, data.fullName);
     }
 
-    function addPatientDocuments(uint patientId, uint documentId, string documentName, string documentType, string accessKey) returns (bool) {
+    function addPatientDocuments(uint patientId, uint documentId, string documentName, string documentType, string accessKey) public returns (bool) {
         if(IsPatientConfigured[patientId] == false){
             return false;
         }
@@ -75,25 +74,51 @@ contract PatientProfileContract {
         return true;
     }
 
-    function setDocumentAccess(uint patientId, uint doctorId, uint documentId, string accessKey) returns (bool) {
-        if(IsPatientConfigured[patientId] == false){
-            return false;
-        }
-        patient profile = patients[patientId];
-        DocumentAccess docRights;
-        docRights.PatientId = patientId;
-        docRights.DoctorId = doctorId;
-        docRights.DocumentId = documentId;
-        docRights.AccessKey = accessKey;
-        profile.DocumentAccessRights.push(docRights);
+    function addDoctor(uint doctorId, string doctorName) public returns (bool) {
+        Doctors[doctorId] = doctorName;
         return true;
     }
 
-    function getPatient(uint patientId, uint doctorId) public returns (string[]) {
-        patient p;
-        p.id = 1;
-        p.fullName="Saran";
-        p.DoctorAccess[doctorId].push("Doctor1Key");
-        return p.DoctorAccess[doctorId];
+    string constant emtpyString = "";
+    uint constant maxDocumentLimit = 9999999999;
+
+    function setDocumentAccess(uint patientId, uint doctorId, uint documentId) public returns (string) {
+        //Step0: if the patient data is not yet configured, do not proceed
+        if(IsPatientConfigured[patientId] == false){
+            return emtpyString;
+        }   
+        //Step1: get the patient profile
+        patient profile = patients[patientId];        
+        uint documentFound = maxDocumentLimit;
+
+        //Step2: get the list of documents, and validate the documentid against the patient's documents
+        for(uint i = 0; i < profile.Documents.length; i++) {
+            if(documentId == profile.Documents[i].DocumentId){
+                documentFound = i;
+                break;
+            }
+        }
+
+        if(documentFound == maxDocumentLimit){
+            return emtpyString; // invalid document id
+        }
+
+        var doctorName = Doctors[doctorId];
+
+        bytes memory emptyStringTest_doctorName = bytes(doctorName);
+
+        if(emptyStringTest_doctorName.length < 1){
+            return emtpyString; // invalid doctorId
+        }
+
+        DocumentAccess docRights;
+
+        //Step3: get the document accesskey and send in the response after adding the access details to the DocumentAccessRights
+        docRights.PatientId = patientId;
+        docRights.DoctorId = doctorId;
+        docRights.DocumentId = documentId;
+        docRights.AccessKey = profile.Documents[documentFound].DocumentKey;
+        profile.DocumentAccessRights.push(docRights);
+        return docRights.AccessKey;
     }
 }
